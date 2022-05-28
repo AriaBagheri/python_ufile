@@ -23,7 +23,7 @@ class _Progress:
         pass
 
     def update(self, v: int):
-        self.value += 1
+        self.value += v
 
 
 class Ufile:
