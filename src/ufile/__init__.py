@@ -4,16 +4,27 @@ __author__ = """Aria Bagheri"""
 __email__ = 'ariab9342@gmail.com'
 __version__ = '1.0.3'
 
+import asyncio
 import json
 import os
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
-from typing import List
+from typing import List, Callable
 
 import aiofiles
 import requests as requests
 
 CHUNK_SIZE = 5368709 * 2
+
+
+class _Progress:
+    value: int = 0
+
+    def __init__(self):
+        pass
+
+    def update(self, v: int):
+        self.value += 1
 
 
 class Ufile:
@@ -38,7 +49,7 @@ class Ufile:
                 num_chunks += 1
         return file_names_list
 
-    async def upload_file(self, file_name: str):
+    async def upload_file(self, file_name: str, progress_callback: Callable[[int, int, int], None] = None):
         file_path = Path(file_name)
         file_size = os.path.getsize(file_name)
 
@@ -53,6 +64,8 @@ class Ufile:
         self.fuid = json.loads(response.content)['fuid']
         chunks = await self.split_file(file_name)
 
+        progress = _Progress()
+
         def upload_chunk(i, chunk):
             requests.post('https://store-eu-hz-3.ufile.io/v1/upload/chunk', data={
                 "chunk_index": i + 1,
@@ -60,6 +73,8 @@ class Ufile:
             }, files={
                 "file": open(chunk, 'rb')
             })
+            progress.update(1)
+            progress_callback(progress.value, os.path.getsize(chunk), file_size)
 
         with ThreadPool() as p:
             p.starmap(upload_chunk, enumerate(chunks))
