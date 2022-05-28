@@ -2,7 +2,7 @@
 
 __author__ = """Aria Bagheri"""
 __email__ = 'ariab9342@gmail.com'
-__version__ = '1.0.5'
+__version__ = '1.0.4'
 
 import json
 import os
@@ -48,7 +48,7 @@ class Ufile:
                 num_chunks += 1
         return file_names_list
 
-    async def upload_file(self, file_name: str, progress_callback: Callable[[int, int, int], None] = None):
+    async def upload_file(self, file_name: str, progress_callback: Callable[[int, int], None] = None):
         file_path = Path(file_name)
         file_size = os.path.getsize(file_name)
 
@@ -72,8 +72,8 @@ class Ufile:
             }, files={
                 "file": open(chunk, 'rb')
             })
-            progress.update(1)
-            progress_callback(progress.value, os.path.getsize(chunk), file_size)
+            progress.update(os.path.getsize(chunk))
+            progress_callback(progress.value, file_size)
 
         with ThreadPool() as p:
             p.starmap(upload_chunk, enumerate(chunks))
