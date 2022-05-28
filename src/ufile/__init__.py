@@ -4,7 +4,6 @@ __author__ = """Aria Bagheri"""
 __email__ = 'ariab9342@gmail.com'
 __version__ = '1.0.3'
 
-import asyncio
 import json
 import os
 from multiprocessing.pool import ThreadPool
