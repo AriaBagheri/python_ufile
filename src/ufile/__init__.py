@@ -2,7 +2,7 @@
 
 __author__ = """Aria Bagheri"""
 __email__ = 'ariab9342@gmail.com'
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
 import asyncio
 import json
