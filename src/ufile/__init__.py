@@ -91,6 +91,7 @@ class Ufile:
                     progress.update(os.path.getsize(chunk))
                     if self.progress_callback and progress.should_update():
                         await self.progress_callback(progress.value, file_size)
+                    os.remove(chunk)
 
             def add_to_event_loop(j, c):
                 return asyncio.get_event_loop().create_task(upload_chunk(j, c))
