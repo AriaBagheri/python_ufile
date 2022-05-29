@@ -5,6 +5,7 @@ __email__ = 'ariab9342@gmail.com'
 __version__ = '1.0.7'
 
 import asyncio
+import datetime
 import json
 import os
 from itertools import starmap
@@ -18,6 +19,7 @@ CHUNK_SIZE = 5368709 * 2
 
 
 class _Progress:
+    last_update_at: datetime.datetime = None
     value: int = 0
 
     def __init__(self):
@@ -25,6 +27,14 @@ class _Progress:
 
     def update(self, v: int):
         self.value += v
+
+    def should_update(self):
+        if not self.last_update_at:
+            self.last_update_at = datetime.datetime.now()
+        if self.last_update_at + datetime.timedelta(milliseconds=200) >= datetime.datetime.now():
+            return False
+        self.last_update_at = datetime.datetime.now()
+        return True
 
 
 class Ufile:
@@ -79,10 +89,8 @@ class Ufile:
                                             "file": open(chunk, 'rb')
                                         }):
                     progress.update(os.path.getsize(chunk))
-                    if self.progress_callback:
+                    if self.progress_callback and progress.should_update():
                         await self.progress_callback(progress.value, file_size)
-
-            tasks = []
 
             def add_to_event_loop(j, c):
                 return asyncio.get_event_loop().create_task(upload_chunk(j, c))
@@ -101,7 +109,6 @@ class Ufile:
             async with session.post('https://store-eu-hz-3.ufile.io/v1/upload/finalise',
                                     data=data, headers=headers) as response:
                 loaded_content = await response.content.read()
-                print(loaded_content)
                 return json.loads(loaded_content)['url']
 
     async def download_file_link(self, slug):

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: python-ufile
-Version: 1.0.6
+Version: 1.0.7
 Summary: Upload/Download from ufile.io as a guest or with an API Key.
 Author-email: Aria Bagheri <ariab9342@gmail.com>
 License: MIT License
