@@ -21,9 +21,10 @@ CHUNK_SIZE = 5368709 * 2
 class _Progress:
     last_update_at: datetime.datetime = None
     value: int = 0
+    update_interval_ms: int = 200
 
-    def __init__(self):
-        pass
+    def __init__(self, update_interval_ms):
+        self.update_interval_ms = update_interval_ms
 
     def update(self, v: int):
         self.value += v
@@ -41,10 +42,13 @@ class Ufile:
     api_key: str = ""
     fuid: str = ""
     progress_callback: Callable[[int, int], Awaitable[Any]] = None
+    progress_update_ms: int = 200
 
-    def __init__(self, api_key: str = "", progress_callback: Callable[[int, int], Awaitable[Any]] = None):
+    def __init__(self, api_key: str = "", progress_callback: Callable[[int, int], Awaitable[Any]] = None,
+                 progress_update_ms: int = 200):
         self.api_key = api_key
         self.progress_callback = progress_callback
+        self.progress_update_ms = progress_update_ms
 
     @staticmethod
     async def split_file(file_name: str) -> List[str]:
@@ -79,7 +83,7 @@ class Ufile:
 
             chunks = await self.split_file(file_name)
 
-            progress = _Progress()
+            progress = _Progress(self.progress_update_ms)
 
             async def upload_chunk(i, chunk):
                 async with session.post('https://store-eu-hz-3.ufile.io/v1/upload/chunk',
